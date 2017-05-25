@@ -1,0 +1,33 @@
+{
+  "name": "taleo-nodejs-sdk",
+  "version": "0.1.0",
+  "description": "Taleo Buesiness Edition REST API SDK for Node.js applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/stria/taleo-nodejs-sdk.git"
+  },
+  "keywords": [
+    "stria",
+    "taleo",
+    "business",
+    "edition",
+    "rest",
+    "api",
+    "sdk",
+    "human",
+    "resources",
+    "hr",
+    "management",
+    "oracle"
+  ],
+  "author": "Paul Holden",
+  "license": "UNLICENSED",
+  "homepage": "https://bitbucket.org/stria/taleo-nodejs-sdk#readme",
+  "dependencies": {
+    "dotenv": "^4.0.0"
+  }
+}
