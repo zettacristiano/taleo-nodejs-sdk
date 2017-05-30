@@ -3,21 +3,21 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const cc = process.env.TALEO_COMPANY_CODE;
+const companyCode = process.env.TALEO_COMPANY_CODE;
 const username = process.env.TALEO_USERNAME;
 const password = process.env.TALEO_PASSWORD;
 
-assert(cc, 'COMPANY_CODE not defined');
+assert(companyCode, 'COMPANY_CODE not defined');
 assert(username, 'USERNAME not defined');
 assert(password, 'PASSWORD not defined');
 
-var dispatcher = require('../lib/dispatcher.js');
-var authenticate = require('../lib/authenticate.js');
+const dispatcher = require('../lib/dispatcher');
+const authenticate = require('../lib/authenticate');
 
-dispatcher(cc, (resourceURL) => {
-	console.log(resourceURL);
+dispatcher((err, resourceURL) => {
+	console.log(err || resourceURL);
 
-	authenticate(resourceURL, username, password, cc, (token) => {
-		console.log(token);
-	});
+	authenticate(resourceURL, (err, token) => {
+		console.log(err || token);
+	})
 });
