@@ -13,7 +13,6 @@ Note: All of the following variables are *required*.
 
 | Variable | Description |
 |----------|-------------|
-| TALEO_HOSTNAME | This value should always be `tbe.taleo.net` |
 | TALEO_COMPANY_CODE | This code is used to identify which account to log into |
 | TALEO_USERNAME | Your Taleo account username. |
 | TALEO_PASSWORD | Your Taleo account password. |
