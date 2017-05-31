@@ -1,6 +1,8 @@
 Taleo Node.js REST API SDK
 ==========================
 
+[![Coverage Status](https://coveralls.io/repos/bitbucket/stria/taleo-nodejs-sdk/badge.svg?branch=master)](https://coveralls.io/bitbucket/stria/taleo-nodejs-sdk?branch=master)
+
 This SDK provides a limited feature set, as it was created and is developed primarily for internal IT work at Stria.
 
 To use this SDK, you must create a `.env` file in the root of your project that defines some environment variables used to access Taleo. Alternatively, you can simply define these when running your application, like so:
