@@ -19,5 +19,5 @@ dispatcher((err, resourceURL) => {
 
 	authenticate(resourceURL, (err, token) => {
 		console.log(err || token);
-	})
+	});
 });
