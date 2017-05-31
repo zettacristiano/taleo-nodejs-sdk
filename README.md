@@ -1,7 +1,7 @@
 Taleo Node.js REST API SDK
 ==========================
 
-[![Coverage Status](https://coveralls.io/repos/bitbucket/stria/taleo-nodejs-sdk/badge.svg?branch=master)](https://coveralls.io/bitbucket/stria/taleo-nodejs-sdk?branch=master)
+[![Build Status](https://travis-ci.org/paulholden2/taleo-nodejs-sdk.svg?branch=master)](https://travis-ci.org/paulholden2/taleo-nodejs-sdk) [![Coverage Status](https://coveralls.io/repos/github/paulholden2/taleo-nodejs-sdk/badge.svg?branch=master)](https://coveralls.io/github/paulholden2/taleo-nodejs-sdk?branch=master)
 
 This SDK provides a limited feature set, as it was created and is developed primarily for internal IT work at Stria.
 
