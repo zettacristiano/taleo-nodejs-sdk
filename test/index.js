@@ -1,23 +1,18 @@
-const assert = require('assert');
+const expect = require('chai').expect;
 const dotenv = require('dotenv');
+const dispatcher = require('../lib/dispatcher');
 
 dotenv.config();
 
-const companyCode = process.env.TALEO_COMPANY_CODE;
-const username = process.env.TALEO_USERNAME;
-const password = process.env.TALEO_PASSWORD;
+describe('GET resource URL', function () {
+	it('returns resource URL', function (done) {
+		this.timeout(5000);
 
-assert(companyCode, 'COMPANY_CODE not defined');
-assert(username, 'USERNAME not defined');
-assert(password, 'PASSWORD not defined');
+		dispatcher((err, resourceURL) => {
+			expect(err).to.equal(null);
+			expect(resourceURL).to.be.a('string');
 
-const dispatcher = require('../lib/dispatcher');
-const authenticate = require('../lib/authenticate');
-
-dispatcher((err, resourceURL) => {
-	console.log(err || resourceURL);
-
-	authenticate(resourceURL, (err, token) => {
-		console.log(err || token);
+			done();
+		});
 	});
 });
