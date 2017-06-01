@@ -29,7 +29,7 @@ describe('SDK', function () {
 	describe('Get auth token', function () {
 		var resourceURL = null;
 
-		before(function () {
+		before(function (done) {
 			if (process.env.USE_NOCK) {
 				require('./nock/dispatcher')();
 				require('./nock/authenticate')();
@@ -40,6 +40,8 @@ describe('SDK', function () {
 				expect(url).to.be.a('string');
 
 				resourceURL = url
+
+				done();
 			});
 		});
 
