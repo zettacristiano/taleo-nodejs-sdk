@@ -1,23 +1,57 @@
-const assert = require('assert');
+const expect = require('chai').expect;
 const dotenv = require('dotenv');
-
-dotenv.config();
-
-const companyCode = process.env.TALEO_COMPANY_CODE;
-const username = process.env.TALEO_USERNAME;
-const password = process.env.TALEO_PASSWORD;
-
-assert(companyCode, 'COMPANY_CODE not defined');
-assert(username, 'USERNAME not defined');
-assert(password, 'PASSWORD not defined');
-
 const dispatcher = require('../lib/dispatcher');
 const authenticate = require('../lib/authenticate');
 
-dispatcher((err, resourceURL) => {
-	console.log(err || resourceURL);
+dotenv.config();
 
-	authenticate(resourceURL, (err, token) => {
-		console.log(err || token);
+describe('SDK', function () {
+	describe('Get resource URL', function () {
+		if (process.env.USE_NOCK) {
+			beforeEach(function () {
+				require('./nock/dispatcher')();
+				require('./nock/authenticate')();
+			});
+		}
+
+		it('returns resource URL', function (done) {
+			this.timeout(5000);
+
+			dispatcher((err, resourceURL) => {
+				expect(err).to.equal(null);
+				expect(resourceURL).to.be.a('string');
+
+				done();
+			});
+		});
 	});
+
+	describe('Get auth token', function () {
+		var resourceURL = null;
+
+		before(function (done) {
+			if (process.env.USE_NOCK) {
+				require('./nock/dispatcher')();
+				require('./nock/authenticate')();
+			}
+
+			dispatcher((err, url) => {
+				expect(err).to.equal(null);
+				expect(url).to.be.a('string');
+
+				resourceURL = url
+
+				done();
+			});
+		});
+
+		it('returns auth token', function (done) {
+			authenticate(resourceURL, (err, token) => {
+				expect(err).to.equal(null);
+				expect(token).to.be.a('string');
+
+				done();
+			})
+		})
+	})
 });
