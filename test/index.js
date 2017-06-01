@@ -51,7 +51,7 @@ describe('SDK', function () {
 				expect(token).to.be.a('string');
 
 				done();
-			})
-		})
-	})
+			});
+		});
+	});
 });
