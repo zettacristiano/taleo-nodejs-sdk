@@ -7,7 +7,7 @@ dotenv.config();
 
 describe('SDK', function () {
 	describe('Get resource URL', function () {
-		if (process.env.USE_NOCK) {
+		if (!process.env.NOCK_OFF) {
 			beforeEach(function () {
 				require('./nock/dispatcher')();
 				require('./nock/authenticate')();
@@ -30,7 +30,7 @@ describe('SDK', function () {
 		var resourceURL = null;
 
 		before(function (done) {
-			if (process.env.USE_NOCK) {
+			if (!process.env.NOCK_OFF) {
 				require('./nock/dispatcher')();
 				require('./nock/authenticate')();
 			}
