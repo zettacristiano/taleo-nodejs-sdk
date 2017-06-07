@@ -73,7 +73,6 @@ describe('SDK', function () {
 			if (!process.env.NOCK_OFF) {
 				require('./nock/dispatcher')();
 				require('./nock/authenticate')();
-			} else {
 			}
 
 			dispatcher((err, url) => {
