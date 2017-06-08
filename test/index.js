@@ -136,33 +136,35 @@ describe('SDK', function () {
 			});
 		});
 
-		nock('https://test.service.url/path')
-			.post('/login')
-			.query({
-				orgCode: process.env.TALEO_COMPANY_CODE,
-				userName: process.env.TALEO_USERNAME,
-				password: process.env.TALEO_PASSWORD
-			}).reply(401, {
-				'response': {
-				},
-				'status': {
-					'success': false,
-					'detail': {
-						'errorcode': 33,
-						'errormessage': 'An authentication error'
+		if (!process.env.NOCK_OFF) {
+			nock('https://test.service.url/path')
+				.post('/login')
+				.query({
+					orgCode: process.env.TALEO_COMPANY_CODE,
+					userName: process.env.TALEO_USERNAME,
+					password: process.env.TALEO_PASSWORD
+				}).reply(401, {
+					'response': {
+					},
+					'status': {
+						'success': false,
+						'detail': {
+							'errorcode': 33,
+							'errormessage': 'An authentication error'
+						}
 					}
-				}
-			});
+				});
 
-		it('handles authentication failure', function (done) {
-			auth.login((err, token) => {
-				expect(err).to.exist;
-				expect(token).to.not.exist;
-				expect(auth.token).to.equal(null);
+			it('handles authentication failure', function (done) {
+				auth.login((err, token) => {
+					expect(err).to.exist;
+					expect(token).to.not.exist;
+					expect(auth.token).to.equal(null);
 
-				done();
+					done();
+				});
 			});
-		});
+		}
 	});
 
 	describe('employee', function () {
@@ -178,7 +180,7 @@ describe('SDK', function () {
 			nock(dispatcher.url, {
 				'Cookie': 'authToken=' + auth.token
 			})
-				.get(dispatcher.path + '/employee/search')
+				.get(dispatcher.path + '/object/employee/search')
 				.query({
 					'limit': 0
 				})
