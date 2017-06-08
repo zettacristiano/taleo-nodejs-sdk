@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const dispatcher = require('../lib/dispatcher');
 const auth = require('../lib/auth');
 const diagnose = require('../lib/diagnose');
+const employee = require('../lib/employee');
 
 dotenv.config();
 
@@ -158,6 +159,45 @@ describe('SDK', function () {
 				expect(err).to.exist;
 				expect(token).to.not.exist;
 				expect(auth.token).to.equal(null);
+
+				done();
+			});
+		});
+	});
+
+	describe('employee', function () {
+		before(function (done) {
+			dispatcher.serviceURL((err, url) => {
+				auth.login((err, token) => {
+					done();
+				});
+			});
+		});
+
+		it('gets employee count', function (done) {
+			nock(dispatcher.url, {
+				'Cookie': 'authToken=' + auth.token
+			})
+				.get(dispatcher.path + '/employee/search')
+				.query({
+					'limit': 0
+				})
+				.reply(200, {
+					'response': {
+						'pagination': {
+							'total': 5
+						}
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			employee.count((err, count) => {
+				expect(err).to.not.exist;
+				expect(count).to.exist;
+				expect(count).to.be.a('number');
 
 				done();
 			});
