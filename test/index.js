@@ -177,9 +177,8 @@ describe('SDK', function () {
 		});
 
 		it('gets employee count', function (done) {
-			nock(dispatcher.url, {
-				'Cookie': 'authToken=' + auth.token
-			})
+			nock(dispatcher.url)
+				.matchHeader('Cookie', 'authToken=' + auth.token)
 				.get(dispatcher.path + '/object/employee/search')
 				.query({
 					'limit': 0
