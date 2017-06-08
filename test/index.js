@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const dispatcher = require('../lib/dispatcher');
 const auth = require('../lib/auth');
 const diagnose = require('../lib/diagnose');
+const employee = require('../lib/employee');
 
 dotenv.config();
 
@@ -55,20 +56,20 @@ describe('SDK', function () {
 	});
 
 	describe('dispatcher', function () {
-		nock('https://tbe.taleo.net')
-			.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
-			.reply(200, {
-				'response': {
-					'URL': 'https://test.service.url/path'
-				},
-				'status': {
-					'success': true,
-					'detail': {}
-				}
-			});
-
 		it('returns resource URL', function (done) {
 			this.timeout(5000);
+
+			nock('https://tbe.taleo.net')
+				.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
+				.reply(200, {
+					'response': {
+						'URL': 'https://test.service.url/path'
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
 
 			dispatcher.serviceURL((err, url) => {
 				expect(err).to.equal(null);
@@ -108,24 +109,24 @@ describe('SDK', function () {
 			});
 		});
 
-		nock('https://test.service.url/path')
-			.post('/login')
-			.query({
-				orgCode: process.env.TALEO_COMPANY_CODE,
-				userName: process.env.TALEO_USERNAME,
-				password: process.env.TALEO_PASSWORD
-			}).reply(200, {
-				'response': {
-					'authToken': 'webapi2-abcdefghijklmnop'
-				},
-				'status': {
-					'success': true,
-					'detail': {}
-				}
-			});
-
 		it('returns auth token', function (done) {
-			auth.login(serviceURL, (err, token) => {
+			nock(dispatcher.url)
+				.post(dispatcher.path + '/login')
+				.query({
+					orgCode: process.env.TALEO_COMPANY_CODE,
+					userName: process.env.TALEO_USERNAME,
+					password: process.env.TALEO_PASSWORD
+				}).reply(200, {
+					'response': {
+						'authToken': 'webapi2-abcdefghijklmnop'
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			auth.login((err, token) => {
 				expect(err).to.equal(null);
 				expect(token).to.be.a('string');
 				expect(auth.token).to.exist;
@@ -135,29 +136,69 @@ describe('SDK', function () {
 			});
 		});
 
-		nock('https://test.service.url/path')
-			.post('/login')
-			.query({
-				orgCode: process.env.TALEO_COMPANY_CODE,
-				userName: process.env.TALEO_USERNAME,
-				password: process.env.TALEO_PASSWORD
-			}).reply(401, {
-				'response': {
-				},
-				'status': {
-					'success': false,
-					'detail': {
-						'errorcode': 33,
-						'errormessage': 'An authentication error'
-					}
-				}
-			});
+		if (!process.env.NOCK_OFF) {
+			it('handles authentication failure', function (done) {
+				nock(dispatcher.url)
+					.post(dispatcher.path + '/login')
+					.query({
+						orgCode: process.env.TALEO_COMPANY_CODE,
+						userName: process.env.TALEO_USERNAME,
+						password: process.env.TALEO_PASSWORD
+					}).reply(401, {
+						'response': {
+						},
+						'status': {
+							'success': false,
+							'detail': {
+								'errorcode': 33,
+								'errormessage': 'An authentication error'
+							}
+						}
+					});
 
-		it('handles authentication failure', function (done) {
-			auth.login(serviceURL, (err, token) => {
-				expect(err).to.exist;
-				expect(token).to.not.exist;
-				expect(auth.token).to.equal(null);
+				auth.login((err, token) => {
+					expect(err).to.exist;
+					expect(token).to.not.exist;
+					expect(auth.token).to.equal(null);
+
+					done();
+				});
+			});
+		}
+	});
+
+	describe('employee', function () {
+		before(function (done) {
+			dispatcher.serviceURL((err, url) => {
+				auth.login((err, token) => {
+					done();
+				});
+			});
+		});
+
+		it('gets employee count', function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', 'authToken=' + auth.token)
+				.get(dispatcher.path + '/object/employee/search')
+				.query({
+					'limit': 0
+				})
+				.reply(200, {
+					'response': {
+						'pagination': {
+							'total': 5
+						}
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			employee.count((err, count) => {
+				expect(err).to.not.exist;
+				expect(count).to.exist;
+				expect(count).to.be.a('number');
 
 				done();
 			});
