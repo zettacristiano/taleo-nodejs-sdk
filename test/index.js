@@ -2,7 +2,7 @@ const expect = require('chai').expect;
 const nock = require('nock');
 const dotenv = require('dotenv');
 const dispatcher = require('../lib/dispatcher');
-const authenticate = require('../lib/authenticate');
+const auth = require('../lib/auth');
 const diagnose = require('../lib/diagnose');
 
 dotenv.config();
@@ -125,9 +125,39 @@ describe('SDK', function () {
 			});
 
 		it('returns auth token', function (done) {
-			authenticate(serviceURL, (err, token) => {
+			auth.login(serviceURL, (err, token) => {
 				expect(err).to.equal(null);
 				expect(token).to.be.a('string');
+				expect(auth.token).to.exist;
+				expect(auth.token).to.equal(token);
+
+				done();
+			});
+		});
+
+		nock('https://test.service.url/path')
+			.post('/login')
+			.query({
+				orgCode: process.env.TALEO_COMPANY_CODE,
+				userName: process.env.TALEO_USERNAME,
+				password: process.env.TALEO_PASSWORD
+			}).reply(401, {
+				'response': {
+				},
+				'status': {
+					'success': false,
+					'detail': {
+						'errorcode': 33,
+						'errormessage': 'An authentication error'
+					}
+				}
+			});
+
+		it('handles authentication failure', function (done) {
+			auth.login(serviceURL, (err, token) => {
+				expect(err).to.exist;
+				expect(token).to.not.exist;
+				expect(auth.token).to.equal(null);
 
 				done();
 			});
