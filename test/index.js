@@ -1,4 +1,5 @@
 const expect = require('chai').expect;
+const nock = require('nock');
 const dotenv = require('dotenv');
 const dispatcher = require('../lib/dispatcher');
 const authenticate = require('../lib/authenticate');
@@ -44,12 +45,17 @@ describe('SDK', function () {
 	});
 
 	describe('Get resource URL', function () {
-		if (!process.env.NOCK_OFF) {
-			beforeEach(function () {
-				require('./nock/dispatcher')();
-				require('./nock/authenticate')();
+		nock('https://tbe.taleo.net')
+			.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
+			.reply(200, {
+				'response': {
+					'URL': 'https://test.service.url/path'
+				},
+				'status': {
+					'success': true,
+					'detail': {}
+				}
 			});
-		}
 
 		it('returns resource URL', function (done) {
 			this.timeout(5000);
@@ -70,10 +76,17 @@ describe('SDK', function () {
 		this.timeout(5000);
 
 		before(function (done) {
-			if (!process.env.NOCK_OFF) {
-				require('./nock/dispatcher')();
-				require('./nock/authenticate')();
-			}
+			nock('https://tbe.taleo.net')
+				.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
+				.reply(200, {
+					'response': {
+						'URL': 'https://test.service.url/path'
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
 
 			dispatcher((err, url) => {
 				expect(err).to.equal(null);
@@ -84,6 +97,22 @@ describe('SDK', function () {
 				done();
 			});
 		});
+
+		nock('https://test.service.url/path')
+			.post('/login')
+			.query({
+				orgCode: process.env.TALEO_COMPANY_CODE,
+				userName: process.env.TALEO_USERNAME,
+				password: process.env.TALEO_PASSWORD
+			}).reply(200, {
+				'response': {
+					'authToken': 'webapi2-abcdefghijklmnop'
+				},
+				'status': {
+					'success': true,
+					'detail': {}
+				}
+			});
 
 		it('returns auth token', function (done) {
 			authenticate(resourceURL, (err, token) => {
