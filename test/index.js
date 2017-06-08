@@ -125,7 +125,7 @@ describe('SDK', function () {
 			});
 
 		it('returns auth token', function (done) {
-			auth.login(serviceURL, (err, token) => {
+			auth.login((err, token) => {
 				expect(err).to.equal(null);
 				expect(token).to.be.a('string');
 				expect(auth.token).to.exist;
@@ -154,7 +154,7 @@ describe('SDK', function () {
 			});
 
 		it('handles authentication failure', function (done) {
-			auth.login(serviceURL, (err, token) => {
+			auth.login((err, token) => {
 				expect(err).to.exist;
 				expect(token).to.not.exist;
 				expect(auth.token).to.equal(null);
