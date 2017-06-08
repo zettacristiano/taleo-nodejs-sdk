@@ -8,7 +8,7 @@ const diagnose = require('../lib/diagnose');
 dotenv.config();
 
 describe('SDK', function () {
-	describe('diagnose() Taleo responses', function () {
+	describe('diagnose', function () {
 		it('detects error responses', function (done) {
 			const err = diagnose(null, {
 				'status': {
@@ -54,7 +54,7 @@ describe('SDK', function () {
 		});
 	});
 
-	describe('Get resource URL', function () {
+	describe('dispatcher', function () {
 		nock('https://tbe.taleo.net')
 			.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
 			.reply(200, {
@@ -79,7 +79,7 @@ describe('SDK', function () {
 		});
 	});
 
-	describe('Get auth token', function () {
+	describe('auth', function () {
 		var serviceURL = null;
 
 		// Taleo Stage is slow
