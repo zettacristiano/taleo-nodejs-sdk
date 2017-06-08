@@ -56,20 +56,20 @@ describe('SDK', function () {
 	});
 
 	describe('dispatcher', function () {
-		nock('https://tbe.taleo.net')
-			.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
-			.reply(200, {
-				'response': {
-					'URL': 'https://test.service.url/path'
-				},
-				'status': {
-					'success': true,
-					'detail': {}
-				}
-			});
-
 		it('returns resource URL', function (done) {
 			this.timeout(5000);
+
+			nock('https://tbe.taleo.net')
+				.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
+				.reply(200, {
+					'response': {
+						'URL': 'https://test.service.url/path'
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
 
 			dispatcher.serviceURL((err, url) => {
 				expect(err).to.equal(null);
@@ -109,23 +109,23 @@ describe('SDK', function () {
 			});
 		});
 
-		nock('https://test.service.url/path')
-			.post('/login')
-			.query({
-				orgCode: process.env.TALEO_COMPANY_CODE,
-				userName: process.env.TALEO_USERNAME,
-				password: process.env.TALEO_PASSWORD
-			}).reply(200, {
-				'response': {
-					'authToken': 'webapi2-abcdefghijklmnop'
-				},
-				'status': {
-					'success': true,
-					'detail': {}
-				}
-			});
-
 		it('returns auth token', function (done) {
+			nock(dispatcher.url)
+				.post(dispatcher.path + '/login')
+				.query({
+					orgCode: process.env.TALEO_COMPANY_CODE,
+					userName: process.env.TALEO_USERNAME,
+					password: process.env.TALEO_PASSWORD
+				}).reply(200, {
+					'response': {
+						'authToken': 'webapi2-abcdefghijklmnop'
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
 			auth.login((err, token) => {
 				expect(err).to.equal(null);
 				expect(token).to.be.a('string');
@@ -137,25 +137,25 @@ describe('SDK', function () {
 		});
 
 		if (!process.env.NOCK_OFF) {
-			nock('https://test.service.url/path')
-				.post('/login')
-				.query({
-					orgCode: process.env.TALEO_COMPANY_CODE,
-					userName: process.env.TALEO_USERNAME,
-					password: process.env.TALEO_PASSWORD
-				}).reply(401, {
-					'response': {
-					},
-					'status': {
-						'success': false,
-						'detail': {
-							'errorcode': 33,
-							'errormessage': 'An authentication error'
-						}
-					}
-				});
-
 			it('handles authentication failure', function (done) {
+				nock(dispatcher.url)
+					.post(dispatcher.path + '/login')
+					.query({
+						orgCode: process.env.TALEO_COMPANY_CODE,
+						userName: process.env.TALEO_USERNAME,
+						password: process.env.TALEO_PASSWORD
+					}).reply(401, {
+						'response': {
+						},
+						'status': {
+							'success': false,
+							'detail': {
+								'errorcode': 33,
+								'errormessage': 'An authentication error'
+							}
+						}
+					});
+
 				auth.login((err, token) => {
 					expect(err).to.exist;
 					expect(token).to.not.exist;
