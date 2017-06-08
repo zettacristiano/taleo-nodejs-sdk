@@ -10,7 +10,7 @@ dotenv.config();
 describe('SDK', function () {
 	describe('diagnose() Taleo responses', function () {
 		it('detects error responses', function (done) {
-			const err = diagnose({
+			const err = diagnose(null, {
 				'status': {
 					'success': false,
 					'detail': {
@@ -28,7 +28,7 @@ describe('SDK', function () {
 		});
 
 		it('detects success responses', function (done) {
-			const err = diagnose({
+			const err = diagnose(null, {
 				'response': {
 				},
 				'status': {
@@ -39,6 +39,16 @@ describe('SDK', function () {
 			});
 
 			expect(err).to.equal(null);
+
+			done();
+		});
+
+		it('detects request errors', function (done) {
+			const err = diagnose(new Error('Error message'));
+
+			expect(err).to.exist;
+			expect(err).to.be.a('string');
+			expect(err).to.equal('Error message');
 
 			done();
 		});
