@@ -60,9 +60,9 @@ describe('SDK', function () {
 		it('returns resource URL', function (done) {
 			this.timeout(5000);
 
-			dispatcher((err, resourceURL) => {
+			dispatcher.serviceURL((err, url) => {
 				expect(err).to.equal(null);
-				expect(resourceURL).to.be.a('string');
+				expect(url).to.be.a('string');
 
 				done();
 			});
@@ -70,7 +70,7 @@ describe('SDK', function () {
 	});
 
 	describe('Get auth token', function () {
-		var resourceURL = null;
+		var serviceURL = null;
 
 		// Taleo Stage is slow
 		this.timeout(5000);
@@ -88,11 +88,11 @@ describe('SDK', function () {
 					}
 				});
 
-			dispatcher((err, url) => {
+			dispatcher.serviceURL((err, url) => {
 				expect(err).to.equal(null);
 				expect(url).to.be.a('string');
 
-				resourceURL = url
+				serviceURL = url
 
 				done();
 			});
@@ -115,7 +115,7 @@ describe('SDK', function () {
 			});
 
 		it('returns auth token', function (done) {
-			authenticate(resourceURL, (err, token) => {
+			authenticate(serviceURL, (err, token) => {
 				expect(err).to.equal(null);
 				expect(token).to.be.a('string');
 
