@@ -1,5 +1,6 @@
 const expect = require('chai').expect;
 const nock = require('nock');
+const url = require('url');
 const dotenv = require('dotenv');
 const dispatcher = require('../lib/dispatcher');
 const auth = require('../lib/auth');
@@ -199,6 +200,42 @@ describe('SDK', function () {
 				expect(err).to.not.exist;
 				expect(count).to.exist;
 				expect(count).to.be.a('number');
+
+				done();
+			});
+		});
+
+		it('generates search pages', function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', 'authToken=' + auth.token)
+				.get(dispatcher.path + '/object/employee/search')
+				.query(function (q) {
+					return q.limit !== 0;
+				})
+				.reply(200, function (uri, body, callback) {
+					var base = dispatcher.url + dispatcher.path;
+					var limit = url.parse(base + uri, true).limit;
+
+					callback(null, {
+						'response': {
+							'pagination': {
+								'next': `${base}/object/employee/search?searchId=12345&start=21&limit=${limit}&digicode=abcdefghijklmnop%3D`,
+								'total': 100,
+								'self': `${base}/object/employee/search?searchId=12345&start=21&limit=${limit}&digicode=abcdefghijklmnop%3D`
+							},
+							'searchResults': [
+							]
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+				});
+
+			employee.pages(20, (err, pages) => {
+				expect(err).to.not.exist;
+				expect(pages).to.exist;
 
 				done();
 			});
