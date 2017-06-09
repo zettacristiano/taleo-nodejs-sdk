@@ -281,38 +281,40 @@ describe('SDK', function () {
 	});
 
 	describe('packet', function () {
-		it('get by ID', function (done) {
-			nock(dispatcher.url)
-				.matchHeader('Cookie', 'authToken=' + auth.token)
-				.get(dispatcher.path + '/object/packet/10')
-				.reply(200, {
-					'response': {
-						'packet': {
-							'activitiesCompleted': 0,
-							'activitiesCount': 10,
-							'createdById': 1,
-							'creationDate': '2000-01-01',
-							'dueDate': '2000-01-15',
-							'employeeId': 10,
-							'activityPacketId': 10,
-							'ownerId': 1,
-							'status': 1,
-							'usageCxt': 'ON_BOARDING',
-							'title': 'John Doe Hiring Packet'
+		if (!process.env.NOCK_OFF) {
+			it('get by ID', function (done) {
+				nock(dispatcher.url)
+					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.get(dispatcher.path + '/object/packet/10')
+					.reply(200, {
+						'response': {
+							'packet': {
+								'activitiesCompleted': 0,
+								'activitiesCount': 10,
+								'createdById': 1,
+								'creationDate': '2000-01-01',
+								'dueDate': '2000-01-15',
+								'employeeId': 10,
+								'activityPacketId': 10,
+								'ownerId': 1,
+								'status': 1,
+								'usageCxt': 'ON_BOARDING',
+								'title': 'John Doe Hiring Packet'
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
 						}
-					},
-					'status': {
-						'success': true,
-						'detail': {}
-					}
+					});
+
+				packet.byID(10, (err, packet) => {
+					expect(err).to.not.exist;
+					expect(packet).to.exist;
+
+					done();
 				});
-
-			packet.byID(10, (err, packet) => {
-				expect(err).to.not.exist;
-				expect(packet).to.exist;
-
-				done();
 			});
-		});
+		}
 	});
 });
