@@ -7,6 +7,8 @@ const auth = require('../lib/auth');
 const diagnose = require('../lib/diagnose');
 const employee = require('../lib/employee');
 const packet = require('../lib/packet');
+const activity = require('../lib/activity');
+const status = require('../lib/object/status');
 
 dotenv.config();
 
@@ -222,6 +224,7 @@ describe('SDK', function () {
 								'firstName': 'John',
 								'middleInitial': 'U',
 								'lastName': 'Doe',
+								'jobTitle': 'Missing',
 								'email': 'johndoe@email.com',
 								'employeeNumber': 'EMP12345',
 								'employeeId': 10,
@@ -238,6 +241,10 @@ describe('SDK', function () {
 					});
 
 				employee.byID(10, (err, emp) => {
+					expect(err).to.not.exist;
+					expect(emp).to.exist;
+					expect(emp.id).to.be.a('number');
+
 					done();
 				});
 			});
@@ -311,6 +318,230 @@ describe('SDK', function () {
 				packet.byID(10, (err, packet) => {
 					expect(err).to.not.exist;
 					expect(packet).to.exist;
+
+					done();
+				});
+			});
+		}
+	});
+
+	describe('activity', function () {
+		before(function (done) {
+			auth.login((err, token) => {
+				done();
+			});
+		});
+
+		if (!process.env.NOCK_OFF) {
+			it('get by ID', function (done) {
+				nock(dispatcher.url)
+					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.get(dispatcher.path + '/object/activity/1')
+					.reply(200, {
+						'response': {
+							'activity': {
+								'id': 1,
+								'dueDate': '2000-01-03',
+								'item': 'Activity Item',
+								'activityDesc': 'Activity Description',
+								'title': 'Activity Title',
+								'status': 1
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+
+				activity.byID(1, (err, activity) => {
+					expect(err).to.not.exist;
+					expect(activity).to.exist;
+					expect(activity.id).to.equal(1);
+
+					done();
+				});
+			});
+		}
+
+		it('get activity count', function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', 'authToken=' + auth.token)
+				.get(dispatcher.path + '/object/activity/search')
+				.query({
+					'limit': 0
+				})
+				.reply(200, function (uri, body, callback) {
+					var base = dispatcher.url + dispatcher.path;
+					var limit = url.parse(base + uri, true).limit;
+
+					callback(null, {
+						'response': {
+							'pagination': {
+								'total': 1,
+								'self': `${base}/object/activity/search?searchId=9999&start=1&limit=${limit}&digicode=zzzyxwvu%3D`,
+							},
+							'searchResults': [
+							]
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+				});
+
+			activity.count((err, total) => {
+				expect(err).to.not.exist;
+				expect(total).to.exist;
+				expect(total).to.be.a('number');
+
+				done();
+			});
+		});
+	});
+
+	describe('employee - packet', function () {
+		var emp = null;
+
+		before(function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', 'authToken=' + auth.token)
+				.get(dispatcher.path + '/object/employee/10')
+				.reply(200, {
+					'response': {
+						'employee': {
+							'candidate': 1234567,
+							'address': '12345 N. 1st St.',
+							'city': 'Bakersfield',
+							'state': 'California',
+							'zipCode': 93313,
+							'firstName': 'John',
+							'middleInitial': 'U',
+							'lastName': 'Doe',
+							'jobTitle': 'Missing',
+							'email': 'johndoe@email.com',
+							'employeeNumber': 'EMP12345',
+							'employeeId': 10,
+							'hired': '2000-01-01',
+							'birthdate': '1970-01-01',
+							'salary': 100000,
+							'ssn': '123456789'
+						}
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			employee.byID(10, (err, res) => {
+				emp = res;
+
+				done();
+			});
+		});
+
+		if (!process.env.NOCK_OFF) {
+			it('get employee packets', function (done) {
+				// Nock employee - packet relationship
+				nock(dispatcher.url)
+					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.get(dispatcher.path + '/object/employee/10/packet')
+					.reply(200, {
+						'response': {
+							'activityPackets': [
+								{
+									'packet': {
+										'activitiesCompleted': 0,
+										'activitiesCount': 10,
+										'createdById': 1,
+										'creationDate': '2000-01-01',
+										'dueDate': '2000-01-15',
+										'employeeId': 10,
+										'activityPacketId': 10,
+										'ownerId': 1,
+										'status': 1,
+										'usageCxt': 'ON_BOARDING',
+										'title': 'John Doe Hiring Packet'
+									}
+								},
+								{
+									'packet': {
+										'activitiesCompleted': 0,
+										'activitiesCount': 10,
+										'createdById': 2,
+										'creationDate': '2000-01-02',
+										'dueDate': '2000-01-16',
+										'employeeId': 10,
+										'activityPacketId': 11,
+										'ownerId': 1,
+										'status': 1,
+										'usageCxt': 'ON_BOARDING',
+										'title': 'John Doe Hiring Packet (Fixed)'
+									}
+								}
+							]
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+				// Nock each packet
+				nock(dispatcher.url)
+					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.get(dispatcher.path + '/object/packet/10')
+					.reply(200, {
+						'response': {
+							'packet': {
+								'activitiesCompleted': 0,
+								'activitiesCount': 10,
+								'createdById': 1,
+								'creationDate': '2000-01-01',
+								'dueDate': '2000-01-15',
+								'employeeId': 10,
+								'activityPacketId': 10,
+								'ownerId': 1,
+								'status': 1,
+								'usageCxt': 'ON_BOARDING',
+								'title': 'John Doe Hiring Packet'
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+				nock(dispatcher.url)
+					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.get(dispatcher.path + '/object/packet/11')
+					.reply(200, {
+						'response': {
+							'packet': {
+								'activitiesCompleted': 0,
+								'activitiesCount': 10,
+								'createdById': 2,
+								'creationDate': '2000-01-02',
+								'dueDate': '2000-01-16',
+								'employeeId': 10,
+								'activityPacketId': 11,
+								'ownerId': 1,
+								'status': 1,
+								'usageCxt': 'ON_BOARDING',
+								'title': 'John Doe Hiring Packet (Fixed)'
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+
+				employee.packets(emp, (err, packets) => {
+					expect(err).to.not.exist;
+					expect(packets).to.exist;
+					expect(packets.length).to.equal(2);
 
 					done();
 				});

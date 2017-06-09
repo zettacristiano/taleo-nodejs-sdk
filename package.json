@@ -29,6 +29,7 @@
   "license": "UNLICENSED",
   "homepage": "https://bitbucket.org/stria/taleo-nodejs-sdk#readme",
   "dependencies": {
+    "async": "^2.4.1",
     "dotenv": "^4.0.0",
     "request": "^2.81.0"
   },
