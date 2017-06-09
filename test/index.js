@@ -6,6 +6,7 @@ const dispatcher = require('../lib/dispatcher');
 const auth = require('../lib/auth');
 const diagnose = require('../lib/diagnose');
 const employee = require('../lib/employee');
+const packet = require('../lib/packet');
 
 dotenv.config();
 
@@ -205,6 +206,43 @@ describe('SDK', function () {
 			});
 		});
 
+		if (!process.env.NOCK_OFF) {
+			it('get by ID', function (done) {
+				nock(dispatcher.url)
+					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.get(dispatcher.path + '/object/employee/10')
+					.reply(200, {
+						'response': {
+							'employee': {
+								'candidate': 1234567,
+								'address': '12345 N. 1st St.',
+								'city': 'Bakersfield',
+								'state': 'California',
+								'zipCode': 93313,
+								'firstName': 'John',
+								'middleInitial': 'U',
+								'lastName': 'Doe',
+								'email': 'johndoe@email.com',
+								'employeeNumber': 'EMP12345',
+								'employeeId': 10,
+								'hired': '2000-01-01',
+								'birthdate': '1970-01-01',
+								'salary': 100000,
+								'ssn': '123456789'
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+
+				employee.byID(10, (err, emp) => {
+					done();
+				});
+			});
+		}
+
 		it('generates search pages', function (done) {
 			nock(dispatcher.url)
 				.matchHeader('Cookie', 'authToken=' + auth.token)
@@ -236,6 +274,42 @@ describe('SDK', function () {
 			employee.pages(20, (err, pages) => {
 				expect(err).to.not.exist;
 				expect(pages).to.exist;
+
+				done();
+			});
+		});
+	});
+
+	describe('packet', function () {
+		it('get by ID', function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', 'authToken=' + auth.token)
+				.get(dispatcher.path + '/object/packet/10')
+				.reply(200, {
+					'response': {
+						'packet': {
+							'activitiesCompleted': 0,
+							'activitiesCount': 10,
+							'createdById': 1,
+							'creationDate': '2000-01-01',
+							'dueDate': '2000-01-15',
+							'employeeId': 10,
+							'activityPacketId': 10,
+							'ownerId': 1,
+							'status': 1,
+							'usageCxt': 'ON_BOARDING',
+							'title': 'John Doe Hiring Packet'
+						}
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			packet.byID(10, (err, packet) => {
+				expect(err).to.not.exist;
+				expect(packet).to.exist;
 
 				done();
 			});
