@@ -7,6 +7,8 @@ const auth = require('../lib/auth');
 const diagnose = require('../lib/diagnose');
 const employee = require('../lib/employee');
 const packet = require('../lib/packet');
+const activity = require('../lib/activity');
+const status = require('../lib/object/status');
 
 dotenv.config();
 
@@ -321,6 +323,82 @@ describe('SDK', function () {
 				});
 			});
 		}
+	});
+
+	describe('activity', function () {
+		before(function (done) {
+			auth.login((err, token) => {
+				done();
+			});
+		});
+
+		if (!process.env.NOCK_OFF) {
+			it('get by ID', function (done) {
+				nock(dispatcher.url)
+					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.get(dispatcher.path + '/object/activity/1')
+					.reply(200, {
+						'response': {
+							'activity': {
+								'id': 1,
+								'dueDate': '2000-01-03',
+								'item': 'Activity Item',
+								'activityDesc': 'Activity Description',
+								'title': 'Activity Title',
+								'status': 1
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+
+				activity.byID(1, (err, activity) => {
+					expect(err).to.not.exist;
+					expect(activity).to.exist;
+					expect(activity.id).to.equal(1);
+
+					done();
+				});
+			});
+		}
+
+		it('get activity count', function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', 'authToken=' + auth.token)
+				.get(dispatcher.path + '/object/activity/search')
+				.query({
+					'limit': 0
+				})
+				.reply(200, function (uri, body, callback) {
+					var base = dispatcher.url + dispatcher.path;
+					var limit = url.parse(base + uri, true).limit;
+
+					callback(null, {
+						'response': {
+							'pagination': {
+								'total': 1,
+								'self': `${base}/object/activity/search?searchId=9999&start=1&limit=${limit}&digicode=zzzyxwvu%3D`,
+							},
+							'searchResults': [
+							]
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+				});
+
+			activity.count((err, total) => {
+				expect(err).to.not.exist;
+				expect(total).to.exist;
+				expect(total).to.be.a('number');
+
+				done();
+			});
+		});
 	});
 
 	describe('employee - packet', function () {
