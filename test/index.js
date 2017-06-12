@@ -1,4 +1,5 @@
 const expect = require('chai').expect;
+const async = require('async');
 const nock = require('nock');
 const url = require('url');
 const dotenv = require('dotenv');
@@ -318,6 +319,117 @@ describe('SDK', function () {
 				packet.byID(10, (err, packet) => {
 					expect(err).to.not.exist;
 					expect(packet).to.exist;
+
+					done();
+				});
+			});
+
+			it('', function (done) {
+				nock(dispatcher.url)
+					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.get(dispatcher.path + '/object/packet/10')
+					.reply(200, {
+						'response': {
+							'packet': {
+								'activitiesCompleted': 0,
+								'activitiesCount': 10,
+								'createdById': 1,
+								'creationDate': '2000-01-01',
+								'dueDate': '2000-01-15',
+								'employeeId': 10,
+								'activityPacketId': 10,
+								'ownerId': 1,
+								'status': 1,
+								'usageCxt': 'ON_BOARDING',
+								'title': 'John Doe Hiring Packet'
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+
+				nock(dispatcher.url)
+					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.get(dispatcher.path + '/object/packet/12')
+					.reply(200, {
+						'response': {
+							'packet': {
+								'activitiesCompleted': 7,
+								'activitiesCount': 10,
+								'createdById': 1,
+								'creationDate': '2000-01-01',
+								'dueDate': '2000-01-15',
+								'employeeId': 12,
+								'activityPacketId': 12,
+								'ownerId': 1,
+								'status': 2,
+								'usageCxt': 'ON_BOARDING',
+								'title': 'Rupert Doe Hiring Packet'
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+
+				nock(dispatcher.url)
+					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.get(dispatcher.path + '/object/packet/15')
+					.reply(200, {
+						'response': {
+							'packet': {
+								'activitiesCompleted': 10,
+								'activitiesCount': 10,
+								'createdById': 1,
+								'creationDate': '2000-01-01',
+								'dueDate': '2000-01-15',
+								'employeeId': 15,
+								'activityPacketId': 15,
+								'ownerId': 1,
+								'status': 3,
+								'usageCxt': 'ON_BOARDING',
+								'title': 'Jim Doe Hiring Packet'
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+
+				async.waterfall([
+					(callback) => {
+						packet.byID(10, (err, packet) => {
+							expect(err).to.not.exist;
+							expect(packet).to.exist;
+							expect(packet.isComplete()).to.equal(false);
+
+							callback(null);
+						});
+					},
+					(callback) => {
+						packet.byID(12, (err, packet) => {
+							expect(err).to.not.exist;
+							expect(packet).to.exist;
+							expect(packet.isComplete()).to.equal(false);
+
+							callback(null);
+						});
+					},
+					(callback) => {
+						packet.byID(15, (err, packet) => {
+							expect(err).to.not.exist;
+							expect(packet).to.exist;
+							expect(packet.isComplete()).to.equal(true);
+
+							callback(null);
+						});
+					}
+				], (err) => {
+					expect(err).to.not.exist;
 
 					done();
 				});
