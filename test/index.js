@@ -12,7 +12,173 @@ const status = require('../lib/object/status');
 
 dotenv.config();
 
-describe('SDK', function () {
+describe('Taleo Instance API', function () {
+	describe('Dispatcher service', function () {
+		it('handle successful dispatcher service response', function (done) {
+			nock('https://tbe.taleo.net')
+				.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
+				.reply(200, {
+					'response': {
+						'URL': 'https://test.service.url/path'
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			dispatcher.serviceURL((err, url) => {
+				expect(err).to.equal(null);
+				expect(url).to.be.a('string');
+
+				done();
+			});
+		});
+
+		it('handle error dispatcher service response', function (done) {
+			nock('https://tbe.taleo.net')
+				.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
+				.reply(500, {
+					'response': {
+					},
+					'status': {
+						'success': false,
+						'detail': {}
+					}
+				});
+
+			dispatcher.serviceURL((err, url) => {
+				expect(err).to.exist;
+				expect(err).to.be.a('string');
+				expect(url).to.not.exist;
+
+				done();
+			});
+		});
+	});
+
+	describe('Authentication', function () {
+		beforeEach(function (done) {
+			nock('https://tbe.taleo.net')
+				.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
+				.reply(200, {
+					'response': {
+						'URL': 'https://test.service.url/path'
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			dispatcher.serviceURL((err, url) => {
+				expect(err).to.equal(null);
+				expect(url).to.be.a('string');
+
+				done();
+			});
+		});
+
+		// Taleo Stage is slow
+		this.timeout(5000);
+
+		it('handle successful login', function (done) {
+			nock(dispatcher.url)
+				.post(dispatcher.path + '/login')
+				.query({
+					orgCode: process.env.TALEO_COMPANY_CODE,
+					userName: process.env.TALEO_USERNAME,
+					password: process.env.TALEO_PASSWORD
+				}).reply(200, {
+					'response': {
+						'authToken': 'webapi2-abcdefghijklmnop'
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			auth.login((err, token) => {
+				expect(err).to.equal(null);
+				expect(token).to.be.a('string');
+
+				done();
+			});
+		});
+
+		it('handle successful logout', function (done) {
+			nock(dispatcher.url)
+				.post(dispatcher.path + '/logout')
+				.reply(200, {
+					'response': {
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			auth.login((err, token) => {
+				auth.logout(token, (err) => {
+					expect(err).to.equal(null);
+
+					done();
+				});
+			});
+		});
+	});
+});
+
+describe('Taleo Object API', function () {
+	beforeEach(function (done) {
+		nock('https://tbe.taleo.net')
+			.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
+			.reply(200, {
+				'response': {
+					'URL': 'https://test.service.url/path'
+				},
+				'status': {
+					'success': true,
+					'detail': {}
+				}
+			});
+
+		dispatcher.serviceURL((err, url) => {
+			expect(err).to.equal(null);
+			expect(url).to.be.a('string');
+
+			nock(dispatcher.url)
+				.post(dispatcher.path + '/login')
+				.query({
+					orgCode: process.env.TALEO_COMPANY_CODE,
+					userName: process.env.TALEO_USERNAME,
+					password: process.env.TALEO_PASSWORD
+				}).reply(200, {
+					'response': {
+						'authToken': 'webapi2-abcdefghijklmnop'
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			nock(dispatcher.url)
+				.post(dispatcher.path + '/logout')
+				.reply(200, {
+					'response': {
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			done();
+		});
+	});
+
 	describe('diagnose', function () {
 		it('detects error responses', function (done) {
 			const err = diagnose(null, {
@@ -59,130 +225,12 @@ describe('SDK', function () {
 		});
 	});
 
-	describe('dispatcher', function () {
-		it('returns resource URL', function (done) {
-			this.timeout(5000);
-
-			nock('https://tbe.taleo.net')
-				.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
-				.reply(200, {
-					'response': {
-						'URL': 'https://test.service.url/path'
-					},
-					'status': {
-						'success': true,
-						'detail': {}
-					}
-				});
-
-			dispatcher.serviceURL((err, url) => {
-				expect(err).to.equal(null);
-				expect(url).to.be.a('string');
-
-				done();
-			});
-		});
-	});
-
-	describe('auth', function () {
-		var serviceURL = null;
-
-		// Taleo Stage is slow
-		this.timeout(5000);
-
-		before(function (done) {
-			nock('https://tbe.taleo.net')
-				.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
-				.reply(200, {
-					'response': {
-						'URL': 'https://test.service.url/path'
-					},
-					'status': {
-						'success': true,
-						'detail': {}
-					}
-				});
-
-			dispatcher.serviceURL((err, url) => {
-				expect(err).to.equal(null);
-				expect(url).to.be.a('string');
-
-				serviceURL = url
-
-				done();
-			});
-		});
-
-		it('returns auth token', function (done) {
-			nock(dispatcher.url)
-				.post(dispatcher.path + '/login')
-				.query({
-					orgCode: process.env.TALEO_COMPANY_CODE,
-					userName: process.env.TALEO_USERNAME,
-					password: process.env.TALEO_PASSWORD
-				}).reply(200, {
-					'response': {
-						'authToken': 'webapi2-abcdefghijklmnop'
-					},
-					'status': {
-						'success': true,
-						'detail': {}
-					}
-				});
-
-			auth.login((err, token) => {
-				expect(err).to.equal(null);
-				expect(token).to.be.a('string');
-				expect(auth.token).to.exist;
-				expect(auth.token).to.equal(token);
-
-				done();
-			});
-		});
-
-		if (!process.env.NOCK_OFF) {
-			it('handles authentication failure', function (done) {
-				nock(dispatcher.url)
-					.post(dispatcher.path + '/login')
-					.query({
-						orgCode: process.env.TALEO_COMPANY_CODE,
-						userName: process.env.TALEO_USERNAME,
-						password: process.env.TALEO_PASSWORD
-					}).reply(401, {
-						'response': {
-						},
-						'status': {
-							'success': false,
-							'detail': {
-								'errorcode': 33,
-								'errormessage': 'An authentication error'
-							}
-						}
-					});
-
-				auth.login((err, token) => {
-					expect(err).to.exist;
-					expect(token).to.not.exist;
-					expect(auth.token).to.equal(null);
-
-					done();
-				});
-			});
-		}
-	});
-
 	describe('employee', function () {
-		before(function (done) {
-			dispatcher.serviceURL((err, url) => {
-				auth.login((err, token) => {
-					done();
-				});
-			});
-		});
-
 		it('gets employee count', function (done) {
 			nock(dispatcher.url)
-				.matchHeader('Cookie', 'authToken=' + auth.token)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
 				.get(dispatcher.path + '/object/employee/search')
 				.query({
 					'limit': 0
@@ -211,7 +259,9 @@ describe('SDK', function () {
 		if (!process.env.NOCK_OFF) {
 			it('get by ID', function (done) {
 				nock(dispatcher.url)
-					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
 					.get(dispatcher.path + '/object/employee/10')
 					.reply(200, {
 						'response': {
@@ -252,7 +302,9 @@ describe('SDK', function () {
 
 		it('generates search pages', function (done) {
 			nock(dispatcher.url)
-				.matchHeader('Cookie', 'authToken=' + auth.token)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
 				.get(dispatcher.path + '/object/employee/search')
 				.query(function (q) {
 					return q.limit !== 0;
@@ -291,7 +343,9 @@ describe('SDK', function () {
 		if (!process.env.NOCK_OFF) {
 			it('get by ID', function (done) {
 				nock(dispatcher.url)
-					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
 					.get(dispatcher.path + '/object/packet/10')
 					.reply(200, {
 						'response': {
@@ -326,16 +380,12 @@ describe('SDK', function () {
 	});
 
 	describe('activity', function () {
-		before(function (done) {
-			auth.login((err, token) => {
-				done();
-			});
-		});
-
 		if (!process.env.NOCK_OFF) {
 			it('get by ID', function (done) {
 				nock(dispatcher.url)
-					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
 					.get(dispatcher.path + '/object/activity/1')
 					.reply(200, {
 						'response': {
@@ -366,7 +416,9 @@ describe('SDK', function () {
 
 		it('get activity count', function (done) {
 			nock(dispatcher.url)
-				.matchHeader('Cookie', 'authToken=' + auth.token)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
 				.get(dispatcher.path + '/object/activity/search')
 				.query({
 					'limit': 0
@@ -406,7 +458,9 @@ describe('SDK', function () {
 
 		before(function (done) {
 			nock(dispatcher.url)
-				.matchHeader('Cookie', 'authToken=' + auth.token)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
 				.get(dispatcher.path + '/object/employee/10')
 				.reply(200, {
 					'response': {
@@ -446,7 +500,9 @@ describe('SDK', function () {
 			it('get employee packets', function (done) {
 				// Nock employee - packet relationship
 				nock(dispatcher.url)
-					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
 					.get(dispatcher.path + '/object/employee/10/packet')
 					.reply(200, {
 						'response': {
@@ -490,7 +546,9 @@ describe('SDK', function () {
 					});
 				// Nock each packet
 				nock(dispatcher.url)
-					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
 					.get(dispatcher.path + '/object/packet/10')
 					.reply(200, {
 						'response': {
@@ -514,7 +572,9 @@ describe('SDK', function () {
 						}
 					});
 				nock(dispatcher.url)
-					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
 					.get(dispatcher.path + '/object/packet/11')
 					.reply(200, {
 						'response': {
