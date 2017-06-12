@@ -608,4 +608,120 @@ describe('Taleo Object API', function () {
 			});
 		}
 	});
+
+	describe('packet - activity', function () {
+		var pkt = null;
+
+		before(function (done) {
+			nock(dispatcher.url)
+				.post(dispatcher.path + '/login')
+				.query({
+					orgCode: process.env.TALEO_COMPANY_CODE,
+					userName: process.env.TALEO_USERNAME,
+					password: process.env.TALEO_PASSWORD
+				}).reply(200, {
+					'response': {
+						'authToken': 'webapi2-abcdefghijklmnop'
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			nock(dispatcher.url)
+				.post(dispatcher.path + '/logout')
+				.reply(200, {
+					'response': {
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			nock(dispatcher.url)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
+				.get(dispatcher.path + '/object/packet/10')
+				.reply(200, {
+					'response': {
+						'packet': {
+							'activitiesCompleted': 0,
+							'activitiesCount': 10,
+							'createdById': 1,
+							'creationDate': '2000-01-01',
+							'dueDate': '2000-01-15',
+							'employeeId': 10,
+							'activityPacketId': 10,
+							'ownerId': 1,
+							'status': 1,
+							'usageCxt': 'ON_BOARDING',
+							'title': 'John Doe Hiring Packet'
+						}
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			packet.byID(10, (err, res) => {
+				pkt = res;
+
+				done();
+			});
+		});
+
+		it('get packet activities', function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
+				.get(dispatcher.path + '/object/packet/10/activity')
+				.reply(200, {
+					'response': {
+						'activities': [
+							{
+								'activity': {
+									'id': 1000,
+									'assignee': [
+										1
+									],
+									'activityDesc': 'Activity',
+									'item': 'Activity Item',
+									'status': 3,
+									'title': 'Activity Title'
+								}
+							},
+							{
+								'activity': {
+									'id': 1001,
+									'assignee': [
+										1
+									],
+									'activityDesc': 'Activity',
+									'item': 'Activity Item',
+									'status': 1,
+									'title': 'Activity Title'
+								}
+							}
+						]
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			packet.activities(pkt, (err, activities) => {
+				expect(err).to.not.exist;
+				expect(activities).to.exist;
+				expect(activities).to.be.an('array');
+
+				done();
+			});
+		});
+	});
 });
