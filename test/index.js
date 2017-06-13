@@ -713,6 +713,22 @@ describe('Taleo Object API', function () {
 									'relationshipUrls': {
 									}
 								}
+							},
+							{
+								'activity': {
+									'id': 1002,
+									'assignee': [
+										1,
+										2
+									],
+									'activityDesc': 'Activity',
+									'item': 'Activity Item',
+									'status': 3,
+									'title': 'Activity Title',
+									'relationshipUrls': {
+										'formDownloadUrl': dispatcher.url + dispatcher.path + '/object/activity/1002/form/download'
+									}
+								}
 							}
 						]
 					},
@@ -728,6 +744,9 @@ describe('Taleo Object API', function () {
 				expect(activities).to.be.an('array');
 				expect(activities[0].completed()).to.equal(true);
 				expect(activities[1].completed()).to.equal(false);
+				expect(activities[0].signed()).to.equal(true);
+				expect(activities[1].signed()).to.equal(false);
+				expect(activities[2].signed()).to.equal(false);
 
 				done();
 			});
