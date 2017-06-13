@@ -395,7 +395,9 @@ describe('Taleo Object API', function () {
 								'item': 'Activity Item',
 								'activityDesc': 'Activity Description',
 								'title': 'Activity Title',
-								'status': 1
+								'status': 1,
+								'relationshipUrls': {
+								}
 							}
 						},
 						'status': {
@@ -692,7 +694,10 @@ describe('Taleo Object API', function () {
 									'activityDesc': 'Activity',
 									'item': 'Activity Item',
 									'status': 3,
-									'title': 'Activity Title'
+									'title': 'Activity Title',
+									'relationshipUrls': {
+										'formDownloadUrl': dispatcher.url + dispatcher.path + '/object/activity/1000/form/download'
+									}
 								}
 							},
 							{
@@ -704,7 +709,9 @@ describe('Taleo Object API', function () {
 									'activityDesc': 'Activity',
 									'item': 'Activity Item',
 									'status': 1,
-									'title': 'Activity Title'
+									'title': 'Activity Title',
+									'relationshipUrls': {
+									}
 								}
 							}
 						]
