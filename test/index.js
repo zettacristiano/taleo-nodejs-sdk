@@ -384,7 +384,9 @@ describe('Taleo Object API', function () {
 
 			it('search', function (done) {
 				nock(dispatcher.url)
-					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
 					.get(dispatcher.path + '/object/packet/10')
 					.reply(200, {
 						'response': {
@@ -409,7 +411,9 @@ describe('Taleo Object API', function () {
 					});
 
 				nock(dispatcher.url)
-					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
 					.get(dispatcher.path + '/object/packet/12')
 					.reply(200, {
 						'response': {
@@ -434,7 +438,9 @@ describe('Taleo Object API', function () {
 					});
 
 				nock(dispatcher.url)
-					.matchHeader('Cookie', 'authToken=' + auth.token)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
 					.get(dispatcher.path + '/object/packet/15')
 					.reply(200, {
 						'response': {
@@ -460,6 +466,33 @@ describe('Taleo Object API', function () {
 
 				async.waterfall([
 					(callback) => {
+						nock(dispatcher.url)
+							.post(dispatcher.path + '/login')
+							.query({
+								orgCode: process.env.TALEO_COMPANY_CODE,
+								userName: process.env.TALEO_USERNAME,
+								password: process.env.TALEO_PASSWORD
+							}).reply(200, {
+								'response': {
+									'authToken': 'webapi2-abcdefghijklmnop'
+								},
+								'status': {
+									'success': true,
+									'detail': {}
+								}
+							});
+
+						nock(dispatcher.url)
+							.post(dispatcher.path + '/logout')
+							.reply(200, {
+								'response': {
+								},
+								'status': {
+									'success': true,
+									'detail': {}
+								}
+							});
+
 						packet.byID(10, (err, packet) => {
 							expect(err).to.not.exist;
 							expect(packet).to.exist;
@@ -469,6 +502,33 @@ describe('Taleo Object API', function () {
 						});
 					},
 					(callback) => {
+						nock(dispatcher.url)
+							.post(dispatcher.path + '/login')
+							.query({
+								orgCode: process.env.TALEO_COMPANY_CODE,
+								userName: process.env.TALEO_USERNAME,
+								password: process.env.TALEO_PASSWORD
+							}).reply(200, {
+								'response': {
+									'authToken': 'webapi2-abcdefghijklmnop'
+								},
+								'status': {
+									'success': true,
+									'detail': {}
+								}
+							});
+
+						nock(dispatcher.url)
+							.post(dispatcher.path + '/logout')
+							.reply(200, {
+								'response': {
+								},
+								'status': {
+									'success': true,
+									'detail': {}
+								}
+							});
+
 						packet.byID(12, (err, packet) => {
 							expect(err).to.not.exist;
 							expect(packet).to.exist;
@@ -478,6 +538,33 @@ describe('Taleo Object API', function () {
 						});
 					},
 					(callback) => {
+						nock(dispatcher.url)
+							.post(dispatcher.path + '/login')
+							.query({
+								orgCode: process.env.TALEO_COMPANY_CODE,
+								userName: process.env.TALEO_USERNAME,
+								password: process.env.TALEO_PASSWORD
+							}).reply(200, {
+								'response': {
+									'authToken': 'webapi2-abcdefghijklmnop'
+								},
+								'status': {
+									'success': true,
+									'detail': {}
+								}
+							});
+
+						nock(dispatcher.url)
+							.post(dispatcher.path + '/logout')
+							.reply(200, {
+								'response': {
+								},
+								'status': {
+									'success': true,
+									'detail': {}
+								}
+							});
+
 						packet.byID(15, (err, packet) => {
 							expect(err).to.not.exist;
 							expect(packet).to.exist;
