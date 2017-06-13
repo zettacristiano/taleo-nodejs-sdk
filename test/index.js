@@ -1,4 +1,5 @@
-const expect = require('chai').expect;
+const chai = require('chai');
+const expect = chai.expect;
 const nock = require('nock');
 const url = require('url');
 const dotenv = require('dotenv');
@@ -9,6 +10,9 @@ const employee = require('../lib/employee');
 const packet = require('../lib/packet');
 const activity = require('../lib/activity');
 const status = require('../lib/object/status');
+
+// Chai config
+chai.use(require('chai-fs'));
 
 dotenv.config();
 
@@ -414,6 +418,76 @@ describe('Taleo Object API', function () {
 					done();
 				});
 			});
+
+			it('download activity form PDF', function (done) {
+				nock(dispatcher.url)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
+					.get(dispatcher.path + '/object/activity/1')
+					.reply(200, {
+						'response': {
+							'activity': {
+								'id': 1,
+								'dueDate': '2000-01-03',
+								'item': 'Activity Item',
+								'activityDesc': 'Activity Description',
+								'title': 'Activity Title',
+								'status': 1,
+								'relationshipUrls': {
+								}
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+
+				nock(dispatcher.url)
+					.matchHeader('Accept', 'application/pdf')
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
+					.get(dispatcher.path + '/object/activity/1/form/download')
+					.replyWithFile(200, __dirname + '/test.pdf');
+
+				activity.byID(1, (err, actv) => {
+					nock(dispatcher.url)
+						.post(dispatcher.path + '/login')
+						.query({
+							orgCode: process.env.TALEO_COMPANY_CODE,
+							userName: process.env.TALEO_USERNAME,
+							password: process.env.TALEO_PASSWORD
+						}).reply(200, {
+							'response': {
+								'authToken': 'webapi2-abcdefghijklmnop'
+							},
+							'status': {
+								'success': true,
+								'detail': {}
+							}
+						});
+
+					nock(dispatcher.url)
+						.post(dispatcher.path + '/logout')
+						.reply(200, {
+							'response': {
+							},
+							'status': {
+								'success': true,
+								'detail': {}
+							}
+						});
+
+					activity.download(actv, 'test/downloaded.pdf', (err) => {
+						expect(err).to.not.exist;
+						expect('test/downloaded.pdf').to.be.a.file();
+
+						done();
+					});
+				});
+			});
 		}
 
 		it('get activity count', function (done) {
@@ -747,7 +821,6 @@ describe('Taleo Object API', function () {
 				expect(activities[0].signed()).to.equal(true);
 				expect(activities[1].signed()).to.equal(false);
 				expect(activities[2].signed()).to.equal(false);
-
 				done();
 			});
 		});
