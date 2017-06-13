@@ -324,7 +324,7 @@ describe('SDK', function () {
 				});
 			});
 
-			it('', function (done) {
+			it('search', function (done) {
 				nock(dispatcher.url)
 					.matchHeader('Cookie', 'authToken=' + auth.token)
 					.get(dispatcher.path + '/object/packet/10')
