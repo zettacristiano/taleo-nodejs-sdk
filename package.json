@@ -1,5 +1,5 @@
 {
-  "name": "taleo-nodejs-sdk",
+  "name": "taleo",
   "version": "0.1.0",
   "description": "Taleo Buesiness Edition REST API SDK for Node.js applications",
   "main": "index.js",
@@ -26,7 +26,7 @@
     "oracle"
   ],
   "author": "Paul Holden",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "homepage": "https://github.com/paulholden2/taleo-nodejs-sdk#readme",
   "dependencies": {
     "async": "^2.4.1",
