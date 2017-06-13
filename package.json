@@ -27,7 +27,7 @@
   ],
   "author": "Paul Holden",
   "license": "UNLICENSED",
-  "homepage": "https://bitbucket.org/stria/taleo-nodejs-sdk#readme",
+  "homepage": "https://github.com/paulholden2/taleo-nodejs-sdk#readme",
   "dependencies": {
     "async": "^2.4.1",
     "dotenv": "^4.0.0",
