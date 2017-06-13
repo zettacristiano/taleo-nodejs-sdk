@@ -719,6 +719,8 @@ describe('Taleo Object API', function () {
 				expect(err).to.not.exist;
 				expect(activities).to.exist;
 				expect(activities).to.be.an('array');
+				expect(activities[0].completed()).to.equal(true);
+				expect(activities[1].completed()).to.equal(false);
 
 				done();
 			});
