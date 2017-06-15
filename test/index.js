@@ -1,9 +1,9 @@
+const Taleo = require('../');
 const async = require('async');
 const chai = require('chai');
 const expect = chai.expect;
 const nock = require('nock');
 const url = require('url');
-const dotenv = require('dotenv');
 const dispatcher = require('../lib/dispatcher');
 const auth = require('../lib/auth');
 const diagnose = require('../lib/diagnose');
@@ -11,12 +11,9 @@ const employee = require('../lib/employee');
 const packet = require('../lib/packet');
 const activity = require('../lib/activity');
 const status = require('../lib/object/status');
-const Taleo = require('../');
 
 // Chai config
 chai.use(require('chai-fs'));
-
-dotenv.config();
 
 before(function (done) {
 	nock('https://tbe.taleo.net')

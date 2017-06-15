@@ -1,3 +1,7 @@
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 module.exports = {
 	activity: require('./lib/activity'),
 	employee: require('./lib/employee'),
