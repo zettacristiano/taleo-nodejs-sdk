@@ -11,6 +11,7 @@ const employee = require('../lib/employee');
 const packet = require('../lib/packet');
 const activity = require('../lib/activity');
 const status = require('../lib/object/status');
+const Taleo = require('../');
 
 // Chai config
 chai.use(require('chai-fs'));
