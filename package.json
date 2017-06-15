@@ -1,5 +1,5 @@
 {
-  "name": "taleo",
+  "name": "taleo-nodejs-sdk",
   "version": "0.1.0",
   "description": "Taleo Buesiness Edition REST API SDK for Node.js applications",
   "main": "index.js",
