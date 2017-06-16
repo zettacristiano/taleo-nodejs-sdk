@@ -198,8 +198,8 @@ describe('Taleo Object API', function () {
 					return val.indexOf('authToken=') > -1;
 				})
 				.get(dispatcher.path + '/object/employee/search')
-				.query({
-					'limit': 0
+				.query(function (q) {
+					return q.limit === '0';
 				})
 				.reply(200, {
 					'response': {
@@ -548,8 +548,8 @@ describe('Taleo Object API', function () {
 					return val.indexOf('authToken=') > -1;
 				})
 				.get(dispatcher.path + '/object/activity/search')
-				.query({
-					'limit': 0
+				.query(function (q) {
+					return q.limit === '0';
 				})
 				.reply(200, function (uri, body, callback) {
 					var base = dispatcher.url + dispatcher.path;
