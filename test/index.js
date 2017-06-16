@@ -267,24 +267,24 @@ describe('Taleo Object API', function () {
 		}
 
 		it('generates search pages', function (done) {
+			this.timeout(30000);
+
 			nock(dispatcher.url)
 				.matchHeader('Cookie', function (val) {
 					return val.indexOf('authToken=') > -1;
 				})
 				.get(dispatcher.path + '/object/employee/search')
 				.query(function (q) {
-					return q.limit !== 0;
+					return q.limit === '0';
 				})
 				.reply(200, function (uri, body, callback) {
 					var base = dispatcher.url + dispatcher.path;
-					var limit = url.parse(base + uri, true).limit;
 
 					callback(null, {
 						'response': {
 							'pagination': {
-								'next': `${base}/object/employee/search?searchId=12345&start=21&limit=${limit}&digicode=abcdefghijklmnop%3D`,
-								'total': 100,
-								'self': `${base}/object/employee/search?searchId=12345&start=21&limit=${limit}&digicode=abcdefghijklmnop%3D`
+								'total': 5,
+								'self': `${base}/object/employee/search?searchId=12345&start=1&limit=5&digicode=abcdefghijklmnop%3D`
 							},
 							'searchResults': [
 							]
@@ -296,9 +296,144 @@ describe('Taleo Object API', function () {
 					});
 				});
 
-			employee.pages(20, (err, pages) => {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
+				.get(dispatcher.path + '/object/employee/search')
+				.query(function (q) {
+					return q.start === '1' && q.limit === '5' && q.searchId !== undefined && q.digicode !== undefined;
+				})
+				.reply(200, function (uri, body, callback) {
+					var base = dispatcher.url + dispatcher.path;
+
+					callback(null, {
+						'response': {
+							'pagination': {
+								'total': 5,
+								'self': `${base}/object/employee/search?searchId=12345&start=1&limit=5&digicode=abcdefghijklmnop%3D`
+							},
+							'searchResults': [
+								{
+									'employee': {
+										'candidate': 1,
+										'address': '555 N. 1st St.',
+										'city': 'Bakersfield',
+										'state': 'California',
+										'zipCode': 93313,
+										'firstName': 'Jim',
+										'middleInitial': 'U',
+										'lastName': 'Doe',
+										'jobTitle': 'Missing',
+										'email': 'johndoe@email.com',
+										'employeeNumber': 'EMP12345',
+										'employeeId': 111,
+										'hired': '2000-01-01',
+										'birthdate': '1970-01-01',
+										'salary': 100000,
+										'ssn': '567890123'
+									}
+								},
+								{
+									'employee': {
+										'candidate': 2,
+										'address': '444 N. 1st St.',
+										'city': 'Bakersfield',
+										'state': 'California',
+										'zipCode': 93313,
+										'firstName': 'John',
+										'middleInitial': 'U',
+										'lastName': 'Doe',
+										'jobTitle': 'Missing',
+										'email': 'johndoe@email.com',
+										'employeeNumber': 'EMP12345',
+										'employeeId': 222,
+										'hired': '2000-01-01',
+										'birthdate': '1970-01-01',
+										'salary': 100000,
+										'ssn': '45789012'
+									}
+								},
+								{
+									'employee': {
+										'candidate': 3,
+										'address': '333 N. 1st St.',
+										'city': 'Bakersfield',
+										'state': 'California',
+										'zipCode': 93313,
+										'firstName': 'Jerry',
+										'middleInitial': 'U',
+										'lastName': 'Doe',
+										'jobTitle': 'Missing',
+										'email': 'johndoe@email.com',
+										'employeeNumber': 'EMP12345',
+										'employeeId': 333,
+										'hired': '2000-01-01',
+										'birthdate': '1970-01-01',
+										'salary': 100000,
+										'ssn': '345678901'
+									}
+								},
+								{
+									'employee': {
+										'candidate': 4,
+										'address': '222 N. 1st St.',
+										'city': 'Bakersfield',
+										'state': 'California',
+										'zipCode': 93313,
+										'firstName': 'James',
+										'middleInitial': 'U',
+										'lastName': 'Doe',
+										'jobTitle': 'Missing',
+										'email': 'johndoe@email.com',
+										'employeeNumber': 'EMP12345',
+										'employeeId': 444,
+										'hired': '2000-01-01',
+										'birthdate': '1970-01-01',
+										'salary': 100000,
+										'ssn': '234567890'
+									}
+								},
+								{
+									'employee': {
+										'candidate': 5,
+										'address': '111 N. 1st St.',
+										'city': 'Bakersfield',
+										'state': 'California',
+										'zipCode': 93313,
+										'firstName': 'Jacob',
+										'middleInitial': 'U',
+										'lastName': 'Doe',
+										'jobTitle': 'Missing',
+										'email': 'johndoe@email.com',
+										'employeeNumber': 'EMP12345',
+										'employeeId': 555,
+										'hired': '2000-01-01',
+										'birthdate': '1970-01-01',
+										'salary': 100000,
+										'ssn': '123456789'
+									}
+								}
+							]
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+
+				});
+
+			employee.pages(5, (err, pages) => {
 				expect(err).to.not.exist;
 				expect(pages).to.exist;
+
+				for (var i = 0; i < pages.length; ++i) {
+					pages[i].each((err, employee) => {
+						expect(err).to.not.exist;
+						expect(employee).to.exist;
+					});
+				}
 
 				done();
 			});
