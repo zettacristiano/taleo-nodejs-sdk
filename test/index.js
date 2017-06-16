@@ -421,7 +421,6 @@ describe('Taleo Object API', function () {
 							'detail': {}
 						}
 					});
-
 				});
 
 			employee.pages(5, (err, pages) => {
