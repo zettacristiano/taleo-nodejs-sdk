@@ -10,6 +10,7 @@ const diagnose = require('../lib/diagnose');
 const employee = require('../lib/employee');
 const packet = require('../lib/packet');
 const activity = require('../lib/activity');
+const generate = require('../lib/generate');
 const status = require('../lib/object/status');
 const Taleo = require('../');
 
@@ -67,6 +68,18 @@ before(function (done) {
 beforeEach(function (done) {
 	dispatcher.serviceURL((err, url) => {
 		done();
+	});
+});
+
+describe('Utility and Helper Functions', function () {
+	describe('generate entities', function () {
+		it('Employees', function (done) {
+			var list = generate.entities('badentity', []);
+
+			expect(list).to.not.exist;
+
+			done();
+		});
 	});
 });
 
