@@ -428,9 +428,10 @@ describe('Taleo Object API', function () {
 				expect(pages).to.exist;
 
 				for (var i = 0; i < pages.length; ++i) {
-					pages[i].each((err, employee) => {
+					pages[i].read((err, employees) => {
 						expect(err).to.not.exist;
-						expect(employee).to.exist;
+						expect(employees).to.exist;
+						expect(employees.length).to.be.a('number');
 					});
 				}
 
