@@ -101,7 +101,7 @@ describe('Taleo Dispatcher Service', function () {
 	it('error service URL request', function (done) {
 		dispatcher.serviceURL('BAD_ORG_CODE', (err, url) => {
 			expect(err).to.exist;
-			expect(err).to.be.a('string');
+			expect(err).to.be.an('error');
 			expect(url).to.not.exist;
 
 			done();
@@ -185,8 +185,8 @@ describe('Taleo Object API', function () {
 			});
 
 			expect(err).to.exist;
-			expect(err).to.be.a('string');
-			expect(err).to.equal('100 An API error');
+			expect(err).to.be.an('error');
+			expect(err.message).to.equal('100 An API error');
 
 			done();
 		});
@@ -211,8 +211,8 @@ describe('Taleo Object API', function () {
 			const err = diagnose(new Error('Error message'));
 
 			expect(err).to.exist;
-			expect(err).to.be.a('string');
-			expect(err).to.equal('Error message');
+			expect(err).to.be.an('error');
+			expect(err.message).to.equal('Error message');
 
 			done();
 		});
