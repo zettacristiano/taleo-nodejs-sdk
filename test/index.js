@@ -39,7 +39,7 @@ before(function (done) {
 			password: process.env.TALEO_PASSWORD
 		}).reply(200, {
 			'response': {
-				'authToken': 'webapi2-abcdefghijklmnop'
+				'authToken': process.env.TALEO_AUTH_TOKEN || 'webapi2-abcdefghijklmnop'
 			},
 			'status': {
 				'success': true,
@@ -113,27 +113,44 @@ describe('Taleo Authentication', function () {
 	// Taleo Stage is slow
 	this.timeout(5000);
 
-	it('login', function (done) {
-		auth.login((err, token) => {
+	it('login/logout', function (done) {
+		auth.login((err, body) => {
 			expect(err).to.equal(null);
-			expect(token).to.be.a('string');
+			expect(body).to.exist;
 
-			done();
-		});
-	});
-
-	it('logout', function (done) {
-		auth.login((err, token) => {
-			auth.logout(token, (err) => {
+			auth.logout(body.response.token, (err) => {
 				expect(err).to.equal(null);
 
-				done();
+				if (!process.env.NOCK_OFF) {
+					var authToken = 'webapi2-predefinedabcd';
+
+					// Toggle predefined token
+					if (process.env.TALEO_AUTH_TOKEN)
+						process.env.TALEO_AUTH_TOKEN = null;
+					else
+						process.env.TALEO_AUTH_TOKEN = authToken;
+
+					auth.login((err, body) => {
+						expect(err).to.not.exist;
+						expect(body).to.exist;
+
+						auth.logout(body.response.token, (err) => {
+							expect(err).to.not.exist;
+
+							done();
+						});
+					});
+				} else {
+					done();
+				}
 			});
 		});
 	});
 });
 
 describe('Taleo Object API', function () {
+	this.timeout(30000);
+
 	beforeEach(function (done) {
 		nock('https://tbe.taleo.net')
 			.get(`/MANAGER/dispatcher/api/v1/serviceUrl/${process.env.TALEO_COMPANY_CODE}`)
