@@ -118,7 +118,7 @@ describe('Taleo Authentication', function () {
 			expect(err).to.equal(null);
 			expect(body).to.exist;
 
-			auth.logout(body.response.token, (err) => {
+			auth.logout(body.response.authToken, (err) => {
 				expect(err).to.equal(null);
 
 				if (!process.env.NOCK_OFF) {
@@ -134,7 +134,7 @@ describe('Taleo Authentication', function () {
 						expect(err).to.not.exist;
 						expect(body).to.exist;
 
-						auth.logout(body.response.token, (err) => {
+						auth.logout(body.response.authToken, (err) => {
 							expect(err).to.not.exist;
 
 							done();
