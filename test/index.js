@@ -137,6 +137,8 @@ describe('Taleo Authentication', function () {
 						auth.logout(body.response.authToken, (err) => {
 							expect(err).to.not.exist;
 
+							process.env.TALEO_AUTH_TOKEN = null;
+
 							done();
 						});
 					});
