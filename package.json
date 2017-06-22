@@ -1,6 +1,6 @@
 {
   "name": "taleo-nodejs-sdk",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Taleo Buesiness Edition REST API SDK for Node.js applications",
   "main": "index.js",
   "scripts": {
