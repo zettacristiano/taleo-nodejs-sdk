@@ -673,10 +673,13 @@ describe('Taleo Object API', function () {
 							'activity': {
 								'id': 1,
 								'dueDate': '2000-01-03',
+								'assignee': [
+									1
+								],
 								'item': 'Activity Item',
 								'activityDesc': 'Activity Description',
 								'title': 'Activity Title',
-								'status': 1,
+								'status': 3,
 								'relationshipUrls': {
 								}
 							}
@@ -696,9 +699,54 @@ describe('Taleo Object API', function () {
 					.replyWithFile(200, __dirname + '/test.pdf');
 
 				activity.byID(1, (err, actv) => {
-					activity.download(actv, 'test/downloaded.pdf', (err) => {
+					activity.download(actv, 'test/1.pdf', (err) => {
 						expect(err).to.not.exist;
-						expect('test/downloaded.pdf').to.be.a.file();
+						expect('test/1.pdf').to.be.a.file();
+
+						done();
+					});
+				});
+			});
+
+			it('disallow incomplete activity download', function (done) {
+				nock(dispatcher.url)
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
+					.get(dispatcher.path + '/object/activity/2')
+					.reply(200, {
+						'response': {
+							'activity': {
+								'id': 2,
+								'dueDate': '2000-01-03',
+								'assignee': [
+									2
+								],
+								'item': 'Activity Item',
+								'activityDesc': 'Activity Description',
+								'title': 'Activity Title',
+								'status': 1,
+								'relationshipUrls': {
+								}
+							}
+						},
+						'status': {
+							'success': true,
+							'detail': {}
+						}
+					});
+
+				nock(dispatcher.url)
+					.matchHeader('Accept', 'application/pdf')
+					.matchHeader('Cookie', function (val) {
+						return val.indexOf('authToken=') > -1;
+					})
+					.get(dispatcher.path + '/object/activity/2/form/download')
+					.reply(200);
+
+				activity.byID(2, (err, actv) => {
+					activity.download(actv, 'test/2.pdf', (err) => {
+						expect(err).to.exist;
 
 						done();
 					});
