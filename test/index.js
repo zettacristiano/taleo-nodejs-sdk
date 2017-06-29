@@ -10,6 +10,7 @@ const diagnose = require('../lib/diagnose');
 const employee = require('../lib/employee');
 const packet = require('../lib/packet');
 const activity = require('../lib/activity');
+const location = require('../lib/location');
 const generate = require('../lib/generate');
 const status = require('../lib/object/status');
 
@@ -742,6 +743,50 @@ describe('Taleo Object API', function () {
 
 				done();
 			});
+		});
+	});
+
+	describe('location', function () {
+		var loc = null;
+
+		beforeEach(function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
+				.get(dispatcher.path + '/object/location/1')
+				.reply(200, {
+					'response': {
+						'location': {
+							'id': 1,
+							'phone': '(111) 111-1111',
+							'address': '54321 S. 10th St.',
+							'city': 'Bakersfield',
+							'state': 'California',
+							'countryCode': 'US',
+							'zipCode': 93313,
+							'locationName': 'Test Facility - Bakersfield',
+							'locationCode': 'LOC-BAK1',
+						}
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			location.byID(1, (err, res) => {
+				expect(err).to.not.exist;
+				expect(res).to.exist;
+
+				loc = res;
+
+				done();
+			});
+		});
+
+		it('get by ID', function (done) {
+			done();
 		});
 	});
 
