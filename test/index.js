@@ -747,9 +747,7 @@ describe('Taleo Object API', function () {
 	});
 
 	describe('location', function () {
-		var loc = null;
-
-		beforeEach(function (done) {
+		it('get by ID', function (done) {
 			nock(dispatcher.url)
 				.matchHeader('Cookie', function (val) {
 					return val.indexOf('authToken=') > -1;
@@ -765,7 +763,7 @@ describe('Taleo Object API', function () {
 							'state': 'California',
 							'countryCode': 'US',
 							'zipCode': 93313,
-							'locationName': 'Test Facility - Bakersfield',
+							'locationName': 'Test Facility 1 - Bakersfield',
 							'locationCode': 'LOC-BAK1',
 						}
 					},
@@ -785,8 +783,56 @@ describe('Taleo Object API', function () {
 			});
 		});
 
-		it('get by ID', function (done) {
-			done();
+		it('all locations', function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
+				.get(dispatcher.path + '/object/location')
+				.reply(200, {
+					'response': {
+						'locations': [
+							{
+								'location': {
+									'id': 1,
+									'phone': '(111) 111-1111',
+									'address': '54321 S. 10th St.',
+									'city': 'Bakersfield',
+									'state': 'California',
+									'countryCode': 'US',
+									'zipCode': 93313,
+									'locationName': 'Test Facility 1 - Bakersfield',
+									'locationCode': 'LOC-BAK1',
+								}
+							},
+							{
+								'location': {
+									'id': 2,
+									'phone': '(222) 222-2222',
+									'address': '98765 S. 11th St.',
+									'city': 'Bakersfield',
+									'state': 'California',
+									'countryCode': 'US',
+									'zipCode': 93313,
+									'locationName': 'Test Facility 2 - Bakersfield',
+									'locationCode': 'LOC-BAK2',
+								}
+							}
+						]
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			location.all((err, locations) => {
+				expect(err).to.not.exist;
+				expect(locations).to.exist;
+				expect(locations.length).to.be.a('number');
+
+				done();
+			});
 		});
 	});
 
