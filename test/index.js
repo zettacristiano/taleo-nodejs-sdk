@@ -884,6 +884,91 @@ describe('Taleo Object API', function () {
 		});
 	});
 
+	describe('employee - location', function () {
+		var emp = null;
+
+		beforeEach(function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
+				.get(dispatcher.path + '/object/employee/160')
+				.reply(200, {
+					'response': {
+						'employee': {
+							'candidate': 1234567,
+							'address': '12345 N. 1st St.',
+							'city': 'Bakersfield',
+							'state': 'California',
+							'zipCode': 93313,
+							'firstName': 'John',
+							'middleInitial': 'U',
+							'lastName': 'Doe',
+							'jobTitle': 'Missing',
+							'email': 'johndoe@email.com',
+							'employeeNumber': 'EMP12345',
+							'employeeId': 160,
+							'hired': '2000-01-01',
+							'birthdate': '1970-01-01',
+							'salary': 100000,
+							'ssn': '123456789',
+							'location': 1
+						}
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			employee.byID(160, (err, res) => {
+				expect(err).to.not.exist;
+				expect(res).to.exist;
+
+				emp = res;
+
+				done();
+			});
+		});
+
+		it('get employee location', function (done) {
+			nock(dispatcher.url)
+				.matchHeader('Cookie', function (val) {
+					return val.indexOf('authToken=') > -1;
+				})
+				.get(dispatcher.path + '/object/employee/160/location')
+				.reply(200, {
+					'response': {
+						'location': {
+							'id': 1,
+							'phone': '(111) 111-1111',
+							'address': '54321 S. 10th St.',
+							'city': 'Bakersfield',
+							'state': 'California',
+							'countryCode': 'US',
+							'zipCode': 93313,
+							'locationName': 'Test Facility 1 - Bakersfield',
+							'locationCode': 'LOC-BAK1',
+						}
+					},
+					'status': {
+						'success': true,
+						'detail': {}
+					}
+				});
+
+			employee.location(emp, (err, location) => {
+				expect(err).to.not.exist;
+				expect(location).to.exist;
+				expect(location.id).to.be.a('number');
+
+				console.log(location.name);
+
+				done();
+			});
+		});
+	});
+
 	describe('employee - packet', function () {
 		var emp = null;
 
