@@ -7,5 +7,6 @@ module.exports = {
 	employee: require('./lib/employee'),
 	dispatcher: require('./lib/dispatcher'),
 	packet: require('./lib/packet'),
+	page: require('./lib/page'),
 	location: require('./lib/location')
 };

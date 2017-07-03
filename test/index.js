@@ -9,6 +9,7 @@ const auth = require('../lib/auth');
 const diagnose = require('../lib/diagnose');
 const employee = require('../lib/employee');
 const packet = require('../lib/packet');
+const page = require('../lib/page');
 const activity = require('../lib/activity');
 const location = require('../lib/location');
 const generate = require('../lib/generate');
@@ -458,7 +459,7 @@ describe('Taleo Object API', function () {
 				expect(pages).to.exist;
 
 				for (var i = 0; i < pages.length; ++i) {
-					pages[i].read((err, employees) => {
+					page.read(pages[i], (err, employees) => {
 						expect(err).to.not.exist;
 						expect(employees).to.exist;
 						expect(employees.length).to.be.a('number');
@@ -592,28 +593,28 @@ describe('Taleo Object API', function () {
 
 				async.waterfall([
 					(callback) => {
-						packet.byID(10, (err, packet) => {
+						packet.byID(10, (err, pkt) => {
 							expect(err).to.not.exist;
 							expect(packet).to.exist;
-							expect(packet.isComplete()).to.equal(false);
+							expect(packet.complete(pkt)).to.equal(false);
 
 							callback(null);
 						});
 					},
 					(callback) => {
-						packet.byID(12, (err, packet) => {
+						packet.byID(12, (err, pkt) => {
 							expect(err).to.not.exist;
 							expect(packet).to.exist;
-							expect(packet.isComplete()).to.equal(false);
+							expect(packet.complete(pkt)).to.equal(false);
 
 							callback(null);
 						});
 					},
 					(callback) => {
-						packet.byID(15, (err, packet) => {
+						packet.byID(15, (err, pkt) => {
 							expect(err).to.not.exist;
 							expect(packet).to.exist;
-							expect(packet.isComplete()).to.equal(true);
+							expect(packet.complete(pkt)).to.equal(true);
 
 							callback(null);
 						});
@@ -1229,11 +1230,11 @@ describe('Taleo Object API', function () {
 				expect(err).to.not.exist;
 				expect(activities).to.exist;
 				expect(activities).to.be.an('array');
-				expect(activities[0].completed()).to.equal(true);
-				expect(activities[1].completed()).to.equal(false);
-				expect(activities[0].signed()).to.equal(true);
-				expect(activities[1].signed()).to.equal(false);
-				expect(activities[2].signed()).to.equal(false);
+				expect(activity.completed(activities[0])).to.equal(true);
+				expect(activity.completed(activities[1])).to.equal(false);
+				expect(activity.signed(activities[0])).to.equal(true);
+				expect(activity.signed(activities[1])).to.equal(false);
+				expect(activity.signed(activities[2])).to.equal(false);
 				done();
 			});
 		});
